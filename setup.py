@@ -39,7 +39,6 @@ setup(
         "adafruit-circuitpython-busdevice",
         "adafruit-circuitpython-register",
     ],
-    tests_require=["pytest"],
     # Choose your license
     license="MIT",
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
