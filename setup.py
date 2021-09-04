@@ -34,7 +34,10 @@ setup(
     # Author details
     author="Adafruit Industries",
     author_email="circuitpython@adafruit.com",
-    install_requires=["Adafruit-Blinka"],
+    install_requires=["Adafruit-Blinka",
+                      "adafruit-circuitpython-busdevice",
+                      "adafruit-circuitpython-register"],
+    tests_require=["pytest"],
     # Choose your license
     license="MIT",
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -45,8 +48,10 @@ setup(
         "Topic :: System :: Hardware",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     # What does your project relate to?
     keywords="adafruit is31fl3741 led matrix charlieplex featherwing"
