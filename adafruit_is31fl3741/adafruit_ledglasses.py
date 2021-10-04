@@ -22,12 +22,41 @@ Implementation Notes
   https://github.com/adafruit/circuitpython/releases
 
 """
-from struct import unpack_from
-import adafruit_is31fl3741
-from . import IS31FL3741
+from struct import unpack_from  # pylint: disable=no-name-in-module
+from . import IS31FL3741, NO_BUFFER
+
+# pylint: disable=too-few-public-methods
 
 
-class Right_Ring:
+class RingBase:
+    """
+    Base class for the LED Glasses rings.
+    """
+
+    ledmap_bytes = None
+
+    def __init__(self, is31_controller):
+        self._is31 = is31_controller
+
+    def __setitem__(self, led, color):
+        if not 0 <= led <= 23:
+            raise ValueError("led must be 0~23")
+
+        rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
+        self._is31[rgb[0]] = (color >> 16) & 0xFF
+        self._is31[rgb[1]] = (color >> 8) & 0xFF
+        self._is31[rgb[2]] = color & 0xFF
+
+    def __getitem__(self, led):
+        if not 0 <= led <= 23:
+            raise ValueError("led must be 0~23")
+        rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
+        return (
+            (self._is31[rgb[0]] << 16) | (self._is31[rgb[1]] << 8) | self._is31[rgb[2]]
+        )
+
+
+class Right_Ring(RingBase):
     """The right eye ring of the LED glasses"""
 
     # ledmap = ( # These are BRG order; reordered to RGB in bytes below
@@ -83,28 +112,8 @@ class Right_Ring:
         b"\x00\x3D\x00\x3C\x01\x28"
     )
 
-    def __init__(self, is31_controller):
-        self._is31 = is31_controller
 
-    def __setitem__(self, led, color):
-        if not 0 <= led <= 23:
-            raise ValueError("led must be 0~23")
-
-        rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
-        self._is31[rgb[0]] = (color >> 16) & 0xFF
-        self._is31[rgb[1]] = (color >> 8) & 0xFF
-        self._is31[rgb[2]] = color & 0xFF
-
-    def __getitem__(self, led):
-        if not 0 <= led <= 23:
-            raise ValueError("led must be 0~23")
-        rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
-        return (
-            (self._is31[rgb[0]] << 16) | (self._is31[rgb[1]] << 8) | self._is31[rgb[2]]
-        )
-
-
-class Left_Ring:
+class Left_Ring(RingBase):
     """The left eye ring of the LED glasses"""
 
     # ledmap = ( # These are BRG order; reordered to RGB in bytes below
@@ -159,26 +168,6 @@ class Left_Ring:
         b"\x00\x06\x00\x05\x00\x07"
         b"\x00\xF1\x00\xF0\x01\x5E"
     )
-
-    def __init__(self, is31_controller):
-        self._is31 = is31_controller
-
-    def __setitem__(self, led, color):
-        if not 0 <= led <= 23:
-            raise ValueError("led must be 0~23")
-
-        rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
-        self._is31[rgb[0]] = (color >> 16) & 0xFF
-        self._is31[rgb[1]] = (color >> 8) & 0xFF
-        self._is31[rgb[2]] = color & 0xFF
-
-    def __getitem__(self, led):
-        if not 0 <= led <= 23:
-            raise ValueError("led must be 0~23")
-        rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
-        return (
-            (self._is31[rgb[0]] << 16) | (self._is31[rgb[1]] << 8) | self._is31[rgb[2]]
-        )
 
 
 class LED_Glasses(IS31FL3741):
@@ -374,7 +363,7 @@ class LED_Glasses(IS31FL3741):
     width = 18
     height = 5
 
-    def __init__(self, i2c, allocate=adafruit_is31fl3741.NO_BUFFER):
+    def __init__(self, i2c, allocate=NO_BUFFER):
         super().__init__(i2c, allocate=allocate)
 
         self.set_led_scaling(0xFF)  # turn on LEDs all the way

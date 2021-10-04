@@ -25,7 +25,7 @@ Implementation Notes
 """
 
 from adafruit_bus_device import i2c_device
-from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
+from adafruit_register.i2c_struct import UnaryStruct
 from adafruit_register.i2c_bit import RWBit
 
 __version__ = "0.0.0-auto.0"
@@ -149,14 +149,14 @@ class IS31FL3741:
         if page_value == self._page:
             return  # already set
         if page_value > 4:
-            raise ValueError("Page must be 0 ~ 4")
+            raise ValueError("Page must be 0 - 4")
         self._page = page_value  # cache
         self.unlock()
         self._page_reg = page_value
 
     def __getitem__(self, led):
         if not 0 <= led <= 350:
-            raise ValueError("LED must be 0 ~ 350")
+            raise ValueError("LED must be 0 - 350")
         if self._pixel_buffer:
             return self._pixel_buffer[1 + led]
         if led < 180:
@@ -194,7 +194,7 @@ class IS31FL3741:
     # This function must be replaced for each board
     @staticmethod
     def pixel_addrs(x, y):
-        """Calulate the offset into the device array for x,y pixel"""
+        """Calculate the offset into the device array for x,y pixel"""
         raise NotImplementedError("Supported in subclasses only")
 
     # pylint: disable-msg=too-many-arguments
@@ -240,7 +240,7 @@ class IS31FL3741:
 
         # Iterate through the pixels
         for x in range(self.width):  # yes this double loop is slow,
-            for y in range(self.height):  #  but these displays are small!
+            for y in range(self.height):  # but these displays are small!
                 self.pixel(x, y, pixels[(x, y)])
 
     def show(self):
@@ -256,7 +256,7 @@ class IS31FL3741:
             with self.i2c_device as i2c:
                 # In order to write from pixel buffer directly (without a
                 # whole extra temp buffer), element 180 is saved in a temp var
-                # and replaced with 0 (representing the first regisyer addr on
+                # and replaced with 0 (representing the first register addr on
                 # page 1), then we can i2c.write() directly from that position
                 # in the buffer. Element 180 is restored afterward. This is
                 # the same strategy as used in the Arduino library.

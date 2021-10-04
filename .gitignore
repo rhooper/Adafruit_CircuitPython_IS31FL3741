@@ -13,3 +13,6 @@ bundles
 .eggs
 dist
 **/*.egg-info
+Pipfile*
+.python-version
+build
